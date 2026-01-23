@@ -1,0 +1,59 @@
+﻿@inherits LayoutComponentBase
+@inject MauiApp8.Services.ThemeService ThemeService
+
+<SecurityGuard />
+
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-mark">J</div>
+            <div class="brand-text">
+                <div class="brand-title">Journal</div>
+                <div class="brand-subtitle">Write • Track • Reflect</div>
+            </div>
+        </div>
+
+        <div class="sidebar-nav">
+            <NavMenu />
+        </div>
+
+        <div class="sidebar-footer">
+            <small class="text-muted">v1.0 • Your private space</small>
+        </div>
+    </aside>
+
+    <div class="app-main">
+        <header class="app-topbar">
+
+        </header>
+        <div class="topbar-right">
+            <button class="btn btn-outline-secondary btn-sm"
+                    @onclick="ThemeService.ToggleAsync">
+                @(ThemeService.Current == "dark" ? "🌙 Dark" : "☀️ Light")
+            </button>
+
+            <a class="btn btn-outline-secondary btn-sm ms-2"
+               href="https://learn.microsoft.com/aspnet/core/" target="_blank">
+                About
+            </a>
+        </div>
+
+        <main class="app-content">
+            <div class="content-container">
+                @Body
+            </div>
+        </main>
+    </div>
+</div>
+
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ThemeService.InitAsync();
+        }
+    }
+}
+

@@ -1,0 +1,216 @@
+﻿@page "/today"
+@inject MauiApp8.Services.JournalService JournalService
+
+<div class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center mb-3">
+    <div class="flex-grow-1">
+        <div class="d-flex align-items-center gap-2">
+            <h2 class="mb-0 fw-bold">Today</h2>
+            <span class="badge rounded-pill bg-light text-dark">@DateTime.Now.ToString("ddd, MMM dd")</span>
+        </div>
+        <div class="text-muted mt-1">Write your thoughts, track your mood, and save your day.</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary px-4" @onclick="SaveAsync">
+            <span class="oi oi-check me-2" aria-hidden="true"></span>
+            Save
+        </button>
+        <button class="btn btn-outline-secondary px-4" @onclick="ClearForm">
+            <span class="oi oi-x me-2" aria-hidden="true"></span>
+            Clear
+        </button>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <div class="alert @(IsError ? "alert-danger" : "alert-success") border-0 rounded-4 shadow-sm">
+        <div class="d-flex align-items-start gap-2">
+            <span class="oi @(IsError ? "oi-warning" : "oi-circle-check") mt-1" aria-hidden="true"></span>
+            <div>@Message</div>
+        </div>
+    </div>
+}
+
+<div class="row g-3">
+    <!-- Editor -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header py-3">
+                <div class="fw-semibold">Journal Entry</div>
+                <div class="text-muted small">Markdown supported (optional).</div>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input class="form-control" @bind="Title" placeholder="Give today a title…" />
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label">Content</label>
+                    <textarea class="form-control" rows="10" @bind="Content"
+                              placeholder="Write here… what happened today? how did you feel?"></textarea>
+                    <div class="text-muted small mt-2">
+                        Tip: use <code>#</code> for headings, <code>**bold**</code>, <code>-</code> lists.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mood + Tags -->
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-header py-3">
+                <div class="fw-semibold">Mood</div>
+                <div class="text-muted small">Primary mood is required.</div>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Primary Mood</label>
+                    <select class="form-select" @bind="PrimaryMoodId">
+                        <option value="0">Select primary mood…</option>
+                        @foreach (var m in Moods)
+                        {
+                            <option value="@m.Id">@($"{m.Category} • {m.Name}")</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Secondary Mood 1 (Optional)</label>
+                    <select class="form-select" @bind="Secondary1Id">
+                        <option value="">None</option>
+                        @foreach (var m in Moods)
+                        {
+                            <option value="@m.Id">@($"{m.Category} • {m.Name}")</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label">Secondary Mood 2 (Optional)</label>
+                    <select class="form-select" @bind="Secondary2Id">
+                        <option value="">None</option>
+                        @foreach (var m in Moods)
+                        {
+                            <option value="@m.Id">@($"{m.Category} • {m.Name}")</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header py-3">
+                <div class="fw-semibold">Tags</div>
+                <div class="text-muted small">Comma separated (e.g., Work, Family).</div>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-2">
+                    <input class="form-control" @bind="TagsText" placeholder="Work, Health, Travel" />
+                </div>
+
+                @if (PreviewTags.Count > 0)
+                {
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        @foreach (var t in PreviewTags)
+                        {
+                            <span class="badge rounded-pill bg-light text-dark px-3 py-2">@t</span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted small">Tags you type will preview here.</div>
+                }
+
+                <hr class="my-3" style="border-color: rgba(255,255,255,0.12);" />
+
+                <button class="btn btn-danger w-100" @onclick="DeleteTodayAsync">
+                    <span class="oi oi-trash me-2" aria-hidden="true"></span>
+                    Delete Today
+                </button>
+                <div class="text-muted small mt-2">
+                    This deletes only today’s entry.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    string Title = "";
+    string Content = "";
+    int PrimaryMoodId = 0;
+    int? Secondary1Id = null;
+    int? Secondary2Id = null;
+    string TagsText = "";
+
+    string? Message;
+    bool IsError;
+
+    List<MauiApp8.Entities.Mood> Moods = new();
+
+    List<string> PreviewTags =>
+        TagsText.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.Trim())
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(12)
+                .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Moods = await JournalService.GetMoodsAsync();
+    }
+
+    void ClearForm()
+    {
+        Title = "";
+        Content = "";
+        PrimaryMoodId = 0;
+        Secondary1Id = null;
+        Secondary2Id = null;
+        TagsText = "";
+        Message = null;
+        IsError = false;
+    }
+
+    async Task SaveAsync()
+    {
+        Message = null;
+        IsError = false;
+
+        if (PrimaryMoodId == 0)
+        {
+            Message = "Primary mood is required.";
+            IsError = true;
+            return;
+        }
+
+        var tags = TagsText.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                           .Select(t => t.Trim())
+                           .Where(t => !string.IsNullOrWhiteSpace(t))
+                           .ToList();
+
+        var result = await JournalService.UpsertTodayAsync(Title, Content, PrimaryMoodId, Secondary1Id, Secondary2Id, tags);
+
+        Message = result.Success ? "Saved successfully." : result.Error;
+        IsError = !result.Success;
+    }
+
+    async Task DeleteTodayAsync()
+    {
+        Message = null;
+        IsError = false;
+
+        var result = await JournalService.DeleteEntryByDateAsync(DateTime.Now);
+
+        Message = result.Success ? "Deleted successfully." : result.Error;
+        IsError = !result.Success;
+    }
+}

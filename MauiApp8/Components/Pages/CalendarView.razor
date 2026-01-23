@@ -1,0 +1,176 @@
+﻿@page "/calendar"
+@inject MauiApp8.Services.JournalService JournalService
+@inject NavigationManager Nav
+
+<div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-2 mb-3">
+    <div>
+        <h2 class="mb-0 fw-bold">Calendar</h2>
+        <div class="text-muted mt-1">Browse entries by date.</div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-outline-secondary"
+                @onclick="@(() => ChangeMonth(-1))">
+            <span class="oi oi-chevron-left"></span>
+        </button>
+
+        <input type="month" class="form-control"
+               style="max-width: 180px;"
+               @bind="MonthValue" />
+
+        <button class="btn btn-outline-secondary"
+                @onclick="@(() => ChangeMonth(1))">
+            <span class="oi oi-chevron-right"></span>
+        </button>
+
+        <button class="btn btn-primary px-4"
+                @onclick="LoadMonth">
+            <span class="oi oi-reload me-2"></span>
+            Load
+        </button>
+    </div>
+</div>
+
+@if (!Loaded)
+{
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <div class="spinner-border text-light mb-3"></div>
+            <div class="fw-semibold">Loading month…</div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row text-center fw-semibold mb-2">
+                <div class="col">Sun</div>
+                <div class="col">Mon</div>
+                <div class="col">Tue</div>
+                <div class="col">Wed</div>
+                <div class="col">Thu</div>
+                <div class="col">Fri</div>
+                <div class="col">Sat</div>
+            </div>
+
+            @foreach (var week in Weeks)
+            {
+                <div class="row g-2 mb-2">
+                    @foreach (var day in week)
+                    {
+                        <div class="col">
+                            @if (day == null)
+                            {
+                                <div class="p-3 rounded-4"
+                                     style="background: rgba(255,255,255,0.03); height: 90px;"></div>
+                            }
+                            else
+                            {
+                                var d = day.Value;
+                                bool hasEntry = EntryDates.Contains(d.Date);
+                                bool isToday = d.Date == DateTime.Today;
+
+                                <div class="p-3 rounded-4 h-100"
+                                     style="background: rgba(255,255,255,0.06);
+                                                            border: 1px solid rgba(255,255,255,0.10);
+                                                            cursor: pointer;"
+                                     @onclick="@(() => OpenDay(d, hasEntry))">
+
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="fw-bold @(isToday ? "text-warning" : "")">
+                                            @d.Day
+                                        </div>
+
+                                        @if (hasEntry)
+                                        {
+                                            <span class="badge rounded-pill bg-light text-dark px-2">
+                                                Entry
+                                            </span>
+                                        }
+                                    </div>
+
+                                    @if (isToday && !hasEntry)
+                                    {
+                                        <div class="text-muted small">
+                                            Write today
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="text-muted small mt-2">
+                Tip: click a day to open or write an entry.
+            </div>
+
+        </div>
+    </div>
+}
+
+@code {
+    DateTime MonthValue = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+    bool Loaded = false;
+
+    HashSet<DateTime> EntryDates = new();
+    List<List<DateTime?>> Weeks = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMonth();
+    }
+
+    async Task LoadMonth()
+    {
+        Loaded = false;
+        Weeks.Clear();
+        EntryDates.Clear();
+
+        var start = new DateTime(MonthValue.Year, MonthValue.Month, 1);
+        var end = start.AddMonths(1).AddDays(-1);
+
+        var entries = await JournalService.GetEntriesInRangeAsync(start, end);
+        EntryDates = entries.Select(e => e.EntryDate.Date).ToHashSet();
+
+        var firstDayOfGrid = start.AddDays(-(int)start.DayOfWeek);
+        var lastDayOfGrid = end.AddDays(6 - (int)end.DayOfWeek);
+
+        var current = firstDayOfGrid;
+
+        while (current <= lastDayOfGrid)
+        {
+            var week = new List<DateTime?>();
+            for (int i = 0; i < 7; i++)
+            {
+                week.Add(current.Month == start.Month ? current : null);
+                current = current.AddDays(1);
+            }
+            Weeks.Add(week);
+        }
+
+        Loaded = true;
+    }
+
+    async Task ChangeMonth(int offset)
+    {
+        MonthValue = MonthValue.AddMonths(offset);
+        await LoadMonth();
+    }
+
+    void OpenDay(DateTime date, bool hasEntry)
+    {
+        if (hasEntry)
+        {
+            Nav.NavigateTo($"/entry/{date:yyyy-MM-dd}");
+        }
+        else if (date.Date == DateTime.Today)
+        {
+            Nav.NavigateTo("/today");
+        }
+    }
+}

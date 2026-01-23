@@ -1,0 +1,222 @@
+﻿@page "/dashboard"
+@inject MauiApp8.Services.JournalService JournalService
+
+<div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-2 mb-3">
+    <div>
+        <h2 class="mb-0 fw-bold">Dashboard</h2>
+        <div class="text-muted mt-1">Insights from your journaling patterns.</div>
+    </div>
+</div>
+
+<!-- Filter -->
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control"
+                       @bind-value="StartDate" @bind-value:format="yyyy-MM-dd" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">End Date</label>
+                <input type="date" class="form-control"
+                       @bind-value="EndDate" @bind-value:format="yyyy-MM-dd" />
+            </div>
+
+            <div class="col-md-4 d-flex gap-2">
+                <button class="btn btn-primary px-4 w-100" @onclick="LoadAnalytics">
+                    <span class="oi oi-graph me-2" aria-hidden="true"></span>
+                    Apply Range
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="text-muted">Current Streak</div>
+                    <span class="oi oi-flash" aria-hidden="true"></span>
+                </div>
+                <div class="display-6 fw-bold mt-2">@CurrentStreak</div>
+                <div class="text-muted small">Days in a row</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="text-muted">Longest Streak</div>
+                    <span class="oi oi-star" aria-hidden="true"></span>
+                </div>
+                <div class="display-6 fw-bold mt-2">@LongestStreak</div>
+                <div class="text-muted small">Best streak ever</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="text-muted">Most Frequent Mood</div>
+                    <span class="oi oi-heart" aria-hidden="true"></span>
+                </div>
+                <div class="fs-2 fw-bold mt-2">@MostFrequentMood</div>
+                <div class="text-muted small">Primary mood in selected range</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Mood Distribution -->
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header py-3">
+                <div class="fw-semibold">Mood Distribution</div>
+                <div class="text-muted small">Primary mood category counts</div>
+            </div>
+
+            <div class="card-body">
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded-4"
+                         style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge rounded-pill bg-light text-dark px-3 py-2">Positive</span>
+                            <span class="text-muted small">Good / happy days</span>
+                        </div>
+                        <div class="fw-bold fs-5">@MoodCat["Positive"]</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded-4"
+                         style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge rounded-pill bg-light text-dark px-3 py-2">Neutral</span>
+                            <span class="text-muted small">Balanced days</span>
+                        </div>
+                        <div class="fw-bold fs-5">@MoodCat["Neutral"]</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded-4"
+                         style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge rounded-pill bg-light text-dark px-3 py-2">Negative</span>
+                            <span class="text-muted small">Tough days</span>
+                        </div>
+                        <div class="fw-bold fs-5">@MoodCat["Negative"]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tags -->
+    <div class="col-lg-7">
+        <div class="card h-100 mb-3">
+            <div class="card-header py-3">
+                <div class="fw-semibold">Top Tags</div>
+                <div class="text-muted small">Most used tags (Top 10)</div>
+            </div>
+
+            <div class="card-body">
+                @if (TopTags.Count == 0)
+                {
+                    <div class="text-muted">No tags yet.</div>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var t in TopTags)
+                        {
+                            <span class="badge rounded-pill bg-light text-dark px-3 py-2">
+                                @t.Key <span class="ms-2 opacity-75">(@t.Value)</span>
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Word Trend -->
+        <div class="card h-100">
+            <div class="card-header py-3">
+                <div class="fw-semibold">Word Count Trend</div>
+                <div class="text-muted small">Average words per day (selected range)</div>
+            </div>
+
+            <div class="card-body">
+                @if (WordTrend.Count == 0)
+                {
+                    <div class="text-muted">No data in selected range.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th class="text-end">Avg Words</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in WordTrend)
+                                {
+                                    <tr>
+                                        <td>@p.label</td>
+                                        <td class="text-end fw-semibold">@p.value</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    DateTime StartDate = DateTime.Today.AddDays(-30);
+    DateTime EndDate = DateTime.Today;
+
+    int CurrentStreak;
+    int LongestStreak;
+
+    string MostFrequentMood = "-";
+    Dictionary<string, int> MoodCat = new()
+    {
+        { "Positive", 0 }, { "Neutral", 0 }, { "Negative", 0 }
+    };
+
+    List<KeyValuePair<string, int>> TopTags = new();
+    List<(string label, int value)> WordTrend = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (current, longest, _) = await JournalService.GetStreakStatsAsync(60);
+        CurrentStreak = current;
+        LongestStreak = longest;
+
+        await LoadAnalytics();
+    }
+
+    async Task LoadAnalytics()
+    {
+        var (moodCat, mostMood, tagCounts, wordTrend) =
+            await JournalService.GetAnalyticsAsync(StartDate, EndDate);
+
+        MoodCat = moodCat;
+        MostFrequentMood = mostMood;
+        TopTags = tagCounts.Take(10).ToList();
+        WordTrend = wordTrend;
+    }
+}

@@ -1,0 +1,32 @@
+﻿@inject MauiApp8.Services.SecurityService SecurityService
+@inject NavigationManager Nav
+
+@code {
+    private string? _lastPath;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var path = "/" + Nav.ToBaseRelativePath(Nav.Uri);
+        if (_lastPath == path && !firstRender)
+            return;
+
+        _lastPath = path;
+
+        var relative = Nav.ToBaseRelativePath(Nav.Uri).ToLowerInvariant();
+
+        // allow these pages while locked
+        var allowed =
+            string.IsNullOrWhiteSpace(relative) ||
+            relative.StartsWith("lock") ||
+            relative.StartsWith("security");
+
+        var hasPin = await SecurityService.HasPinAsync();
+        var locked = hasPin && !SecurityService.IsUnlocked;
+
+        // ✅ only redirect if locked AND not already on allowed page
+        if (locked && !allowed)
+        {
+            Nav.NavigateTo("/lock", replace: true);
+        }
+    }
+}

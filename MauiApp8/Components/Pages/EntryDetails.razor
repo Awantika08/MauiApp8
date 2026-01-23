@@ -1,0 +1,195 @@
+﻿@page "/entry/{DateText}"
+@inject MauiApp8.Services.JournalService JournalService
+@inject NavigationManager Nav
+
+<div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-2 mb-3">
+    <div>
+        <h2 class="mb-0 fw-bold">Entry</h2>
+        <div class="text-muted mt-1">Read your journal entry and details.</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary px-4" @onclick="@(() => Nav.NavigateTo("/timeline"))">
+            <span class="oi oi-chevron-left me-2" aria-hidden="true"></span>
+            Timeline
+        </button>
+        <button class="btn btn-outline-secondary px-4" @onclick="@(() => Nav.NavigateTo("/calendar"))">
+            <span class="oi oi-calendar me-2" aria-hidden="true"></span>
+            Calendar
+        </button>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Message) && Entry == null)
+{
+    <div class="alert alert-danger border-0 rounded-4 shadow-sm">
+        <div class="d-flex align-items-start gap-2">
+            <span class="oi oi-warning mt-1" aria-hidden="true"></span>
+            <div>@Message</div>
+        </div>
+    </div>
+}
+else if (Entry == null)
+{
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <div class="spinner-border text-light mb-3"></div>
+            <div class="fw-semibold">Loading entry…</div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        <!-- Main content -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header py-3">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="badge rounded-pill bg-light text-dark px-3 py-2">
+                            <span class="oi oi-calendar me-2" aria-hidden="true"></span>
+                            @Entry.EntryDate.ToString("ddd, MMM dd yyyy")
+                        </span>
+
+                        @if (!string.IsNullOrWhiteSpace(Entry.PrimaryMood?.Name))
+                        {
+                            <span class="badge rounded-pill bg-light text-dark px-3 py-2">
+                                <span class="oi oi-heart me-2" aria-hidden="true"></span>
+                                @Entry.PrimaryMood!.Name
+                            </span>
+                        }
+
+                        <span class="badge rounded-pill bg-light text-dark px-3 py-2">
+                            <span class="oi oi-pencil me-2" aria-hidden="true"></span>
+                            @Entry.WordCount words
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="fw-bold fs-3 mb-2">
+                        @(!string.IsNullOrWhiteSpace(Entry.Title) ? Entry.Title : "Untitled entry")
+                    </div>
+
+                    <div class="text-muted small mb-3">
+                        Saved on @Entry.EntryDate.ToString("yyyy-MM-dd")
+                    </div>
+
+                    <div class="p-3 rounded-4"
+                         style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);">
+                        <div class="fw-semibold mb-2">Content</div>
+                        <div style="white-space: pre-wrap; line-height: 1.7;">
+                            @Entry.Content
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side panel -->
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-header py-3">
+                    <div class="fw-semibold">Tags</div>
+                    <div class="text-muted small">Topics linked to this entry</div>
+                </div>
+                <div class="card-body">
+                    @if (Entry.EntryTags?.Count > 0)
+                    {
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var t in Entry.EntryTags)
+                            {
+                                <span class="badge rounded-pill bg-light text-dark px-3 py-2">
+                                    @t.Tag!.Name
+                                </span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No tags for this entry.</div>
+                    }
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header py-3">
+                    <div class="fw-semibold text-danger">Danger Zone</div>
+                    <div class="text-muted small">This action cannot be undone.</div>
+                </div>
+
+                <div class="card-body">
+                    @if (!string.IsNullOrWhiteSpace(Message) && Entry != null)
+                    {
+                        <div class="alert @(Message!.StartsWith("Deleted") ? "alert-success" : "alert-danger") border-0 rounded-4">
+                            <div style="white-space: pre-wrap;">@Message</div>
+                        </div>
+                    }
+
+                    <button class="btn btn-danger w-100 py-2" @onclick="DeleteThis" disabled="@IsDeleting">
+                        @if (IsDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                            <span>Deleting…</span>
+                        }
+                        else
+                        {
+                            <span class="oi oi-trash me-2" aria-hidden="true"></span>
+                            <span>Delete Entry</span>
+                        }
+                    </button>
+
+                    <div class="text-muted small mt-2">
+                        After deleting, you can return to Timeline.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string DateText { get; set; } = "";
+
+    MauiApp8.Entities.JournalEntry? Entry;
+    string? Message;
+    bool IsDeleting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!DateTime.TryParse(DateText, out var date))
+        {
+            Message = "Invalid date.";
+            return;
+        }
+
+        var result = await JournalService.GetEntryByDateAsync(date);
+        if (!result.Success)
+        {
+            Message = result.Error;
+            return;
+        }
+
+        Entry = result.Data;
+    }
+
+    async Task DeleteThis()
+    {
+        if (Entry == null) return;
+
+        IsDeleting = true;
+        Message = null;
+
+        var res = await JournalService.DeleteEntryByDateAsync(Entry.EntryDate);
+        if (!res.Success)
+        {
+            Message = res.Error;
+        }
+        else
+        {
+            Message = "Deleted successfully.\nGo back to Timeline to continue.";
+        }
+
+        IsDeleting = false;
+    }
+}

@@ -1,0 +1,123 @@
+﻿@page "/security"
+@inject MauiApp8.Services.SecurityService SecurityService
+@inject NavigationManager Nav
+
+<div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-2 mb-3">
+    <div>
+        <h2 class="mb-0 fw-bold">Security</h2>
+        <div class="text-muted mt-1">Set a PIN to lock your journal.</div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <div class="alert @(IsError ? "alert-danger" : "alert-success") border-0 rounded-4 shadow-sm">
+        <div class="d-flex align-items-start gap-2">
+            <span class="oi @(IsError ? "oi-warning" : "oi-circle-check") mt-1" aria-hidden="true"></span>
+            <div>@Message</div>
+        </div>
+    </div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header py-3">
+                <div class="fw-semibold">PIN Lock</div>
+                <div class="text-muted small">Choose a 4–8 digit PIN.</div>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">New PIN</label>
+                    <input class="form-control" type="@(ShowPin ? "text" : "password")" inputmode="numeric"
+                           maxlength="8" @bind="Pin" placeholder="••••" />
+                    <div class="text-muted small mt-1">Digits only (0–9).</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Confirm PIN</label>
+                    <input class="form-control" type="@(ShowPin ? "text" : "password")" inputmode="numeric"
+                           maxlength="8" @bind="ConfirmPin" placeholder="••••" />
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="showPin" @bind="ShowPin" />
+                    <label class="form-check-label" for="showPin">Show PIN</label>
+                </div>
+
+                <button class="btn btn-primary w-100 py-2" @onclick="SavePin">
+                    <span class="oi oi-lock-locked me-2" aria-hidden="true"></span>
+                    Save PIN
+                </button>
+
+                <div class="text-muted small mt-2">
+                    After saving, the app will lock and you’ll be redirected to the lock screen.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header py-3">
+                <div class="fw-semibold">Tips</div>
+                <div class="text-muted small">Keep your journal safe</div>
+            </div>
+
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Use a PIN that’s hard to guess.</li>
+                    <li>Avoid birthdays or repeated numbers like 1111.</li>
+                    <li>If you forget your PIN, you may need to reset app data (depending on your implementation).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    string Pin = "";
+    string ConfirmPin = "";
+    bool ShowPin;
+
+    string? Message;
+    bool IsError;
+
+    async Task SavePin()
+    {
+        Message = null;
+        IsError = false;
+
+        // Basic validation
+        if (string.IsNullOrWhiteSpace(Pin) || Pin.Length < 4 || Pin.Length > 8)
+        {
+            Message = "PIN must be 4–8 digits.";
+            IsError = true;
+            return;
+        }
+
+        if (!Pin.All(char.IsDigit))
+        {
+            Message = "PIN must contain digits only (0–9).";
+            IsError = true;
+            return;
+        }
+
+        if (Pin != ConfirmPin)
+        {
+            Message = "PIN and Confirm PIN do not match.";
+            IsError = true;
+            return;
+        }
+
+        // Save PIN (hashed in DB)
+        await SecurityService.SetPinAsync(Pin);
+
+        // Force lock immediately so user must unlock
+        SecurityService.Lock();
+
+        // Redirect to lock screen
+        Nav.NavigateTo("/lock", replace: true);
+    }
+}

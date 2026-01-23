@@ -1,0 +1,212 @@
+﻿@page "/timeline"
+@inject MauiApp8.Services.JournalService JournalService
+@inject NavigationManager Nav
+
+<div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-2 mb-3">
+    <div>
+        <h2 class="mb-0 fw-bold">Timeline</h2>
+        <div class="text-muted mt-1">Search, filter, and open past entries.</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary px-4" @onclick="ApplyFilter">
+            <span class="oi oi-magnifying-glass me-2" aria-hidden="true"></span>
+            Apply
+        </button>
+        <button class="btn btn-outline-secondary px-4" @onclick="Reset">
+            <span class="oi oi-reload me-2" aria-hidden="true"></span>
+            Reset
+        </button>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <label class="form-label">Search</label>
+                <input class="form-control" placeholder="Search title or content…" @bind="Query" />
+                <div class="text-muted small mt-1">If search is used, mood/date/tag filters are ignored.</div>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <label class="form-label">Start</label>
+                <input type="date" class="form-control"
+                       @bind-value="StartDate" @bind-value:format="yyyy-MM-dd" />
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <label class="form-label">End</label>
+                <input type="date" class="form-control"
+                       @bind-value="EndDate" @bind-value:format="yyyy-MM-dd" />
+            </div>
+
+            <div class="col-lg-2">
+                <label class="form-label">Primary Mood</label>
+                <select class="form-select" @bind="MoodId">
+                    <option value="">All moods</option>
+                    @foreach (var m in Moods)
+                    {
+                        <option value="@m.Id">@m.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-lg-2">
+                <label class="form-label">Tag contains</label>
+                <input class="form-control" placeholder="e.g., Work" @bind="TagText" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Entries.Count == 0)
+{
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <div class="display-6 mb-2">🗓️</div>
+            <div class="fw-semibold">No entries found</div>
+            <div class="text-muted mt-1">Try changing filters or resetting.</div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var e in Entries)
+        {
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-2">
+                            <div class="flex-grow-1">
+                                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                    <span class="badge rounded-pill bg-light text-dark px-3 py-2">
+                                        <span class="oi oi-calendar me-2" aria-hidden="true"></span>
+                                        @e.EntryDate.ToString("ddd, MMM dd yyyy")
+                                    </span>
+
+                                    <span class="badge rounded-pill bg-light text-dark px-3 py-2">
+                                        <span class="oi oi-pencil me-2" aria-hidden="true"></span>
+                                        @e.WordCount words
+                                    </span>
+
+                                    @if (!string.IsNullOrWhiteSpace(e.PrimaryMood?.Name))
+                                    {
+                                        <span class="badge rounded-pill bg-light text-dark px-3 py-2">
+                                            <span class="oi oi-heart me-2" aria-hidden="true"></span>
+                                            @e.PrimaryMood!.Name
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="fw-bold fs-5">
+                                    @(!string.IsNullOrWhiteSpace(e.Title) ? e.Title : "Untitled entry")
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(e.Content))
+                                {
+                                    <div class="text-muted mt-1">
+                                        @Snippet(e.Content, 160)
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-secondary px-4"
+                                        @onclick="@(() => Nav.NavigateTo($"/entry/{e.EntryDate:yyyy-MM-dd}"))">
+                                    <span class="oi oi-external-link me-2" aria-hidden="true"></span>
+                                    Open
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-2 mt-3">
+        <div class="text-muted">
+            Page <span class="fw-semibold">@Page</span> • Showing <span class="fw-semibold">@Entries.Count</span> entries
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary px-4" disabled="@(Page==1)" @onclick="Prev">
+                <span class="oi oi-chevron-left me-2" aria-hidden="true"></span>
+                Prev
+            </button>
+            <button class="btn btn-outline-secondary px-4" @onclick="Next">
+                Next
+                <span class="oi oi-chevron-right ms-2" aria-hidden="true"></span>
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    List<MauiApp8.Entities.JournalEntry> Entries = new();
+    List<MauiApp8.Entities.Mood> Moods = new();
+
+    int Page = 1;
+    int PageSize = 10;
+
+    string Query = "";
+    DateTime? StartDate = null;
+    DateTime? EndDate = null;
+    string TagText = "";
+    int? MoodId = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Moods = await JournalService.GetMoodsAsync();
+        await LoadPage();
+    }
+
+    async Task LoadPage()
+    {
+        Entries = await JournalService.GetPagedAsync(Page, PageSize);
+    }
+
+    async Task ApplyFilter()
+    {
+        if (!string.IsNullOrWhiteSpace(Query))
+        {
+            Entries = await JournalService.SearchAsync(Query);
+            return;
+        }
+
+        Entries = await JournalService.FilterAsync(StartDate, EndDate, MoodId, TagText);
+    }
+
+    async Task Reset()
+    {
+        Query = "";
+        StartDate = null;
+        EndDate = null;
+        TagText = "";
+        MoodId = null;
+        Page = 1;
+        await LoadPage();
+    }
+
+    async Task Prev()
+    {
+        if (Page <= 1) return;
+        Page--;
+        await LoadPage();
+    }
+
+    async Task Next()
+    {
+        Page++;
+        await LoadPage();
+    }
+
+    static string Snippet(string text, int max)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return "";
+        var clean = text.Replace("\r", " ").Replace("\n", " ").Trim();
+        return clean.Length <= max ? clean : clean.Substring(0, max) + "…";
+    }
+}
