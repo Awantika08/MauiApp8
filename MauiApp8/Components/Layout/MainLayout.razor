@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 @inject MauiApp8.Services.ThemeService ThemeService
 
 <SecurityGuard />
@@ -24,19 +25,18 @@
 
     <div class="app-main">
         <header class="app-topbar">
+            <div class="topbar-right">
+                <button class="btn btn-outline-secondary btn-sm"
+                        @onclick="ToggleTheme">
+                    @(ThemeService.Current == "dark" ? "🌙 Dark" : "☀️ Light")
+                </button>
 
+                <a class="btn btn-outline-secondary btn-sm ms-2"
+                   href="https://learn.microsoft.com/aspnet/core/" target="_blank">
+                    About
+                </a>
+            </div>
         </header>
-        <div class="topbar-right">
-            <button class="btn btn-outline-secondary btn-sm"
-                    @onclick="ThemeService.ToggleAsync">
-                @(ThemeService.Current == "dark" ? "🌙 Dark" : "☀️ Light")
-            </button>
-
-            <a class="btn btn-outline-secondary btn-sm ms-2"
-               href="https://learn.microsoft.com/aspnet/core/" target="_blank">
-                About
-            </a>
-        </div>
 
         <main class="app-content">
             <div class="content-container">
@@ -48,12 +48,33 @@
 
 
 @code {
+    protected override void OnInitialized()
+    {
+        ThemeService.OnChanged += HandleThemeChanged;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await ThemeService.InitAsync();
+            StateHasChanged(); // Re-render with correct theme state
         }
+    }
+
+    private async Task ToggleTheme()
+    {
+        await ThemeService.ToggleAsync();
+    }
+
+    private void HandleThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnChanged -= HandleThemeChanged;
     }
 }
 
