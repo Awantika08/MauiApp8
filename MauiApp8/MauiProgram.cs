@@ -38,14 +38,9 @@ public static class MauiProgram
         // ✅ Init + services
         builder.Services.AddSingleton<DbInitializer>();
         builder.Services.AddScoped<JournalService>();
-        builder.Services.AddScoped<SecurityService>();
-        builder.Services.AddScoped<ThemeService>();
-        builder.Services.AddSingleton<PdfExportService>();
         builder.Services.AddSingleton<SecurityService>();
-        builder.Services.AddSingleton<ThemeService>();
-
-
-
+        builder.Services.AddScoped<ThemeService>(); // Scoped for proper JS interop per WebView
+        builder.Services.AddSingleton<PdfExportService>();
 
         var app = builder.Build();
 

@@ -7,7 +7,7 @@ public class ThemeService
     private readonly IJSRuntime _js;
     private bool _jsReady;
 
-    public string Current { get; private set; } = "dark";
+    public string Current { get; private set; } = "light"; // Default to light to match JS
 
     public event Action? OnChanged;
 
@@ -25,7 +25,9 @@ public class ThemeService
 
             var stored = await _js.InvokeAsync<string>("theme.get");
             if (!string.IsNullOrWhiteSpace(stored))
+            {
                 Current = stored;
+            }
 
             await ApplyAsync();
         }
@@ -56,7 +58,7 @@ public class ThemeService
         try
         {
             await _js.InvokeVoidAsync("theme.set", Current);
-            OnChanged?.Invoke();
+            OnChanged?.Invoke(); // Notify subscribers
         }
         catch
         {
