@@ -66,7 +66,7 @@ public class PdfExportService
                 page.Footer().AlignCenter().Text(x =>
                 {
                     x.Span("Generated on ");
-                    x.Span(DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+                  
                 });
             });
         }).GeneratePdf();

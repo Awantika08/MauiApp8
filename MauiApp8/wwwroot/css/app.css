@@ -43,12 +43,12 @@ html, body {
     height: 100%;
 }
 
-/* Light theme - clean white background */
+/* Light theme  */
 html[data-theme="light"] body {
     background: var(--bg);
 }
 
-/* Dark theme - subtle gradient background */
+/* Dark theme */
 html[data-theme="dark"] body {
     background: radial-gradient(900px 600px at 20% 10%, rgba(124, 92, 255, 0.15), transparent 60%),
                 radial-gradient(800px 500px at 90% 30%, rgba(35, 196, 255, 0.10), transparent 60%),
@@ -138,9 +138,7 @@ h1:focus {
     }
 }
 
-/* =========================
-   Modern Journal Theme
-   ========================= */
+/* Modern Journal Theme */
 
 /* Links */
 a {
@@ -153,13 +151,13 @@ a {
         text-decoration: underline;
     }
 
-/* Shell layout (from MainLayout) */
+/* Shell layout  */
 .app-shell {
     min-height: 100vh;
     display: flex;
 }
 
-/* Sidebar - FIXED position so it doesn't scroll */
+/* Sidebar l */
 .app-sidebar {
     width: 290px;
     padding: 18px 16px;
@@ -223,7 +221,7 @@ a {
     color: var(--muted);
 }
 
-/* Nav (from NavMenu) */
+/* Nav  */
 .app-nav {
     display: flex;
     flex-direction: column;
@@ -261,17 +259,17 @@ a {
         color: var(--text);
     }
 
-/* Main area - offset by sidebar width */
+/* Main area  */
 .app-main {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-width: 0;
-    margin-left: 290px; /* Same as sidebar width */
+    margin-left: 290px; 
     background: var(--bg);
 }
 
-/* Topbar - solid background, no blur */
+/* Topbar  */
 .app-topbar {
     position: sticky;
     top: 0;
@@ -314,7 +312,7 @@ a {
     margin: 0 auto;
 }
 
-/* Cards - solid background, no transparency */
+/* Cards */
 .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -338,7 +336,7 @@ a {
     color: var(--muted) !important;
 }
 
-/* Inputs - solid background */
+/* Inputs  */
 .form-control, .form-select, textarea {
     background: var(--surface) !important;
     border: 1px solid var(--border) !important;
@@ -392,7 +390,7 @@ a {
         border-color: var(--border) !important;
     }
 
-/* Responsive: sidebar to top for small screens */
+/* Responsive */
 @media (max-width: 992px) {
     .app-sidebar {
         position: relative;
@@ -404,7 +402,7 @@ a {
     }
 
     .app-main {
-        margin-left: 0; /* Remove offset on mobile */
+        margin-left: 0; 
     }
 
     .app-shell {

@@ -27,15 +27,15 @@ public static class MauiProgram
 
 #endif
 
-        // ✅ SQLite path in local app data folder
+        //  SQLite path in local app data folder
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "journal.db");
 
-        // ✅ DbContextFactory is safest in MAUI Blazor Hybrid
+        // DbContextFactory is safest in MAUI Blazor Hybrid
         builder.Services.AddDbContextFactory<AppDbContext>(options =>
             options.UseSqlite($"Filename={dbPath}")
         );
 
-        // ✅ Init + services
+        //  Init + services
         builder.Services.AddSingleton<DbInitializer>();
         builder.Services.AddScoped<JournalService>();
         builder.Services.AddSingleton<SecurityService>();
@@ -44,7 +44,7 @@ public static class MauiProgram
 
         var app = builder.Build();
 
-        // ✅ Create DB + seed data on startup
+        //  Creating DB + seed data on startup
         using (var scope = app.Services.CreateScope())
         {
             var init = scope.ServiceProvider.GetRequiredService<DbInitializer>();

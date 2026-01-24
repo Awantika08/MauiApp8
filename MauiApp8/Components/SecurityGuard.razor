@@ -14,7 +14,7 @@
 
         var relative = Nav.ToBaseRelativePath(Nav.Uri).ToLowerInvariant();
 
-        // allow these pages while locked
+        // allowing these pages while locked
         var allowed =
             string.IsNullOrWhiteSpace(relative) ||
             relative.StartsWith("lock") ||
@@ -23,7 +23,7 @@
         var hasPin = await SecurityService.HasPinAsync();
         var locked = hasPin && !SecurityService.IsUnlocked;
 
-        // ✅ only redirect if locked AND not already on allowed page
+        // only redirect if locked AND not already on allowed page
         if (locked && !allowed)
         {
             Nav.NavigateTo("/lock", replace: true);

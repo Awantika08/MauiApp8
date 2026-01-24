@@ -9,8 +9,8 @@ public class JournalEntry
 {
     public int Id { get; set; }
 
-    // Enforce "one entry per day" using UNIQUE index in DbContext
-    public DateTime EntryDate { get; set; }  // store date normalized to 00:00:00
+    // Enforing "one entry per day" using UNIQUE index
+    public DateTime EntryDate { get; set; }  // storing date normalized to 00:00:00
 
     public string Title { get; set; } = "";
     public string Content { get; set; } = "";

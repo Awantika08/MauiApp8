@@ -111,13 +111,13 @@
             return;
         }
 
-        // Save PIN (hashed in DB)
+        // Save PIN 
         await SecurityService.SetPinAsync(Pin);
 
-        // Force lock immediately so user must unlock
+         
         SecurityService.Lock();
 
-        // Redirect to lock screen
+        
         Nav.NavigateTo("/lock", replace: true);
     }
 }

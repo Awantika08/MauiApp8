@@ -12,7 +12,7 @@
         <button class="btn btn-outline-secondary px-4" @onclick="@(() => Nav.NavigateTo("/timeline"))">
             <span class="oi oi-chevron-left me-2" aria-hidden="true"></span>
             Timeline
-        </button>
+		</button><EntryDetails />
         <button class="btn btn-outline-secondary px-4" @onclick="@(() => Nav.NavigateTo("/calendar"))">
             <span class="oi oi-calendar me-2" aria-hidden="true"></span>
             Calendar
@@ -187,7 +187,7 @@ else
         }
         else
         {
-            Message = "Deleted successfully.\nGo back to Timeline to continue.";
+            Message = ".";
         }
 
         IsDeleting = false;

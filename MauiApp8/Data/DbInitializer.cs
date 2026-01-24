@@ -23,7 +23,7 @@ public class DbInitializer
         await using var db = await _factory.CreateDbContextAsync();
         await db.Database.EnsureCreatedAsync();
 
-        // Seed AppSettings (single row)
+        // Seed AppSettings
         if (!await db.AppSettings.AnyAsync())
         {
             db.AppSettings.Add(new AppSetting { Id = 1 });
@@ -61,7 +61,7 @@ public class DbInitializer
             await db.SaveChangesAsync();
         }
 
-        // Seed prebuilt tags (your list — keep it, you can add more later)
+        // Seed prebuilt tags
         if (!await db.Tags.AnyAsync())
         {
             string[] prebuilt =

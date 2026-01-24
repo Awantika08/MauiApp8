@@ -7,7 +7,7 @@ public class ThemeService
     private readonly IJSRuntime _js;
     private bool _jsReady;
 
-    public string Current { get; private set; } = "light"; // Default to light to match JS
+    public string Current { get; private set; } = "light"; 
 
     public event Action? OnChanged;
 
@@ -16,7 +16,7 @@ public class ThemeService
         _js = js;
     }
 
-    // Call this ONLY after first render
+    
     public async Task InitAsync()
     {
         try
@@ -33,7 +33,7 @@ public class ThemeService
         }
         catch
         {
-            // MAUI: JS not ready yet → ignore safely
+            
             _jsReady = false;
         }
     }
@@ -58,11 +58,11 @@ public class ThemeService
         try
         {
             await _js.InvokeVoidAsync("theme.set", Current);
-            OnChanged?.Invoke(); // Notify subscribers
+            OnChanged?.Invoke(); 
         }
         catch
         {
-            // MAUI: ignore if WebView not ready yet
+           
         }
     }
 }
