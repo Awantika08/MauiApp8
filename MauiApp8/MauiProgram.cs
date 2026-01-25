@@ -30,6 +30,7 @@ public static class MauiProgram
         //  SQLite path in local app data folder
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "journal.db");
 
+
         // DbContextFactory is safest in MAUI Blazor Hybrid
         builder.Services.AddDbContextFactory<AppDbContext>(options =>
             options.UseSqlite($"Filename={dbPath}")

@@ -1,0 +1,81 @@
+﻿@namespace MauiApp8.Components
+@inherits LayoutComponentBase
+@inject MauiApp8.Services.ThemeService Theme
+
+<div class="app-shell">
+    <aside class="app-sidebar">
+
+        <!-- ✅ Brand + Theme Toggle (in sidebar) -->
+        <div class="sidebar-brand">
+            <div class="brand-left">
+                <div class="brand-mark">J</div>
+                <div>
+                    <div class="brand-title">Journal</div>
+                    <div class="brand-subtitle">Daily reflections</div>
+                </div>
+            </div>
+
+            <button class="btn btn-outline-secondary theme-btn" @onclick="ToggleTheme" title="Toggle theme">
+                @if (Theme.Current == "dark")
+                {
+                    <span>☀️</span>
+                }
+                else
+                {
+                    <span>🌙</span>
+                }
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="app-nav">
+                <NavLink class="app-nav-link" href="/" Match="NavLinkMatch.All">Home</NavLink>
+                <NavLink class="app-nav-link" href="/today">Today</NavLink>
+                <NavLink class="app-nav-link" href="/timeline">Timeline</NavLink>
+                <NavLink class="app-nav-link" href="/calendar">Calendar</NavLink>
+                <NavLink class="app-nav-link" href="/dashboard">Dashboard</NavLink>
+                <NavLink class="app-nav-link" href="/export">Export</NavLink>
+                <NavLink class="app-nav-link" href="/security">Security</NavLink>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <small class="text-muted">MauiApp8</small>
+        </div>
+    </aside>
+
+    <main class="app-main">
+
+        <!-- ✅ Topbar (clean, no theme button here now) -->
+        <header class="app-topbar"></header>
+
+        <section class="app-content">
+            <div class="content-container">
+                @Body
+            </div>
+        </section>
+    </main>
+</div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Theme.InitAsync();
+            Theme.OnChanged += StateHasChanged;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ToggleTheme()
+    {
+        await Theme.ToggleAsync();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Theme.OnChanged -= StateHasChanged;
+    }
+}

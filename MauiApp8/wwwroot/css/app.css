@@ -3,18 +3,27 @@
    ========================= */
 :root,
 html[data-theme="light"] {
-    --bg: #ffffff;
-    --bg2: #f8f9fa;
-    --card: #ffffff;
-    --surface: #f8f9fa;
-    --surface-2: #f1f3f4;
-    --text: #1a1a2e;
-    --muted: #6c757d;
-    --sidebar-bg: #f8f9fa;
-    --border: rgba(0, 0, 0, 0.08);
-    --accent: #7c5cff;
-    --accent-2: #23c4ff;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    /* Backgrounds */
+    --bg: #fff7fb;
+    --bg2: #fff0f8;
+    /* Surfaces */
+    --card: rgba(255, 255, 255, 0.78);
+    --surface: rgba(255, 255, 255, 0.68);
+    --surface-2: rgba(255, 79, 163, 0.10);
+    /* Text */
+    --text: #241a2b;
+    --muted: rgba(36, 26, 43, 0.62);
+    /* Sidebar / Topbar */
+    --sidebar-bg: rgba(255, 255, 255, 0.70);
+    /* Borders / Shadow */
+    --border: rgba(255, 79, 163, 0.16);
+    --shadow: 0 14px 34px rgba(255, 79, 163, 0.10);
+    /* Accents */
+    --accent: #ff4fa3; /* main pink */
+    --accent-2: #b86bff; /* soft purple */
+    /* Extra tokens */
+    --ring: 0 0 0 0.24rem rgba(255, 79, 163, 0.18);
+    --glass-blur: blur(10px);
 }
 
 /* DARK THEME OVERRIDES */
@@ -41,12 +50,20 @@ html, body {
     transition: background-color 0.3s ease, color 0.3s ease;
     margin: 0;
     height: 100%;
+
+
 }
 
 /* Light theme  */
-html[data-theme="light"] body {
-    background: var(--bg);
-}
+    /* Light theme background = pink aesthetic */
+    html[data-theme="light"] body {
+        background: 
+            radial-gradient(1100px 700px at 10% 10%, rgba(255, 79, 163, 0.16), transparent 60%),
+            radial-gradient(900px 600px at 90% 20%, rgba(184, 107, 255, 0.14), transparent 60%),
+            radial-gradient(900px 600px at 55% 90%, rgba(255, 186, 222, 0.22), transparent 55%),
+            linear-gradient(180deg, var(--bg) 0%, #ffffff 55%, var(--bg2) 100%);
+    }
+
 
 /* Dark theme */
 html[data-theme="dark"] body {
@@ -336,6 +353,15 @@ a {
     color: var(--muted) !important;
 }
 
+/* Glass look only in LIGHT theme */
+html[data-theme="light"] .app-sidebar,
+html[data-theme="light"] .app-topbar,
+html[data-theme="light"] .card {
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+
 /* Inputs  */
 .form-control, .form-select, textarea {
     background: var(--surface) !important;
@@ -350,9 +376,10 @@ a {
     }
 
     .form-control:focus, .form-select:focus, textarea:focus {
-        border-color: rgba(124, 92, 255, 0.55) !important;
-        box-shadow: 0 0 0 0.20rem rgba(124, 92, 255, 0.18) !important;
+        border-color: rgba(255, 79, 163, 0.55) !important;
+        box-shadow: var(--ring) !important;
     }
+
 
 /* Buttons */
 .btn-primary {
@@ -362,6 +389,12 @@ a {
     font-weight: 700;
     border-radius: 14px !important;
 }
+
+ .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 34px rgba(255, 79, 163, 0.18);
+  }
+
 
 .btn-outline-secondary {
     border-radius: 14px !important;
@@ -409,4 +442,62 @@ a {
         flex-direction: column;
     }
 }
+
+.theme-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 40px;
+    border-radius: 14px !important;
+    font-size: 1.1rem;
+    padding: 0 !important;
+}
+
+html[data-theme="light"] .theme-btn {
+    background: rgba(255,255,255,0.65) !important;
+}
+
+html[data-theme="dark"] .theme-btn {
+    background: rgba(255,255,255,0.06) !important;
+}
+
+/* Sidebar brand row layout */
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.brand-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Theme button in sidebar */
+.theme-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 40px;
+    border-radius: 14px !important;
+    font-size: 1.1rem;
+    padding: 0 !important;
+}
+
+/* Light aesthetic */
+html[data-theme="light"] .theme-btn {
+    background: rgba(255, 255, 255, 0.65) !important;
+    border-color: rgba(255, 79, 163, 0.22) !important;
+}
+
+/* Dark aesthetic */
+html[data-theme="dark"] .theme-btn {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
 

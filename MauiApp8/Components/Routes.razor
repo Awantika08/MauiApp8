@@ -1,11 +1,12 @@
-﻿@using MauiApp8.Components.Layout
+﻿@using Microsoft.AspNetCore.Components.Routing
+@using MauiApp8.Components
 
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <ErrorBoundary>
-            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        </ErrorBoundary>
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
+
     <NotFound>
         <LayoutView Layout="@typeof(MainLayout)">
             <p>Sorry, there's nothing at this address.</p>

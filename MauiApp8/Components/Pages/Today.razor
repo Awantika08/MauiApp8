@@ -5,9 +5,14 @@
     <div class="flex-grow-1">
         <div class="d-flex align-items-center gap-2">
             <h2 class="mb-0 fw-bold">Today</h2>
-            <span class="badge rounded-pill bg-light text-dark">@DateTime.Now.ToString("ddd, MMM dd")</span>
+            <span class="badge rounded-pill bg-light text-dark">
+                @DateTime.Now.ToString("ddd, MMM dd")
+            </span>
         </div>
-        <div class="text-muted mt-1">Write your thoughts, track your mood, and save your day.</div>
+
+        <div class="text-muted mt-1">
+            Write your thoughts, track your mood, and save your day.
+        </div>
     </div>
 
     <div class="d-flex gap-2">
@@ -15,6 +20,7 @@
             <span class="oi oi-check me-2" aria-hidden="true"></span>
             Save
         </button>
+
         <button class="btn btn-outline-secondary px-4" @onclick="ClearForm">
             <span class="oi oi-x me-2" aria-hidden="true"></span>
             Clear
@@ -33,6 +39,7 @@
 }
 
 <div class="row g-3">
+
     <!-- Editor -->
     <div class="col-lg-8">
         <div class="card">
@@ -42,6 +49,7 @@
             </div>
 
             <div class="card-body">
+
                 <div class="mb-3">
                     <label class="form-label">Title</label>
                     <input class="form-control" @bind="Title" placeholder="Give today a title…" />
@@ -49,18 +57,26 @@
 
                 <div class="mb-0">
                     <label class="form-label">Content</label>
-                    <textarea class="form-control" rows="10" @bind="Content"
-                              placeholder="Write here… what happened today? how did you feel?"></textarea>
+                    <textarea class="form-control"
+                              rows="10"
+                              @bind="Content"
+                              placeholder="Write here… what happened today? how did you feel?">
+                    </textarea>
+
                     <div class="text-muted small mt-2">
-                        Tip: use <code>#</code> for headings, <code>**bold**</code>, <code>-</code> lists.
+                        Tip: use <code>#</code> for headings,
+                        <code>**bold**</code>,
+                        <code>-</code> lists.
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 
     <!-- Mood + Tags -->
     <div class="col-lg-4">
+
         <div class="card mb-3">
             <div class="card-header py-3">
                 <div class="fw-semibold">Mood</div>
@@ -68,13 +84,16 @@
             </div>
 
             <div class="card-body">
+
                 <div class="mb-3">
                     <label class="form-label">Primary Mood</label>
                     <select class="form-select" @bind="PrimaryMoodId">
                         <option value="0">Select primary mood…</option>
                         @foreach (var m in Moods)
                         {
-                            <option value="@m.Id">@($"{m.Category} • {m.Name}")</option>
+                            <option value="@m.Id">
+                                @($"{m.Category} • {m.Name}")
+                            </option>
                         }
                     </select>
                 </div>
@@ -85,7 +104,9 @@
                         <option value="">None</option>
                         @foreach (var m in Moods)
                         {
-                            <option value="@m.Id">@($"{m.Category} • {m.Name}")</option>
+                            <option value="@m.Id">
+                                @($"{m.Category} • {m.Name}")
+                            </option>
                         }
                     </select>
                 </div>
@@ -96,10 +117,13 @@
                         <option value="">None</option>
                         @foreach (var m in Moods)
                         {
-                            <option value="@m.Id">@($"{m.Category} • {m.Name}")</option>
+                            <option value="@m.Id">
+                                @($"{m.Category} • {m.Name}")
+                            </option>
                         }
                     </select>
                 </div>
+
             </div>
         </div>
 
@@ -110,8 +134,11 @@
             </div>
 
             <div class="card-body">
+
                 <div class="mb-2">
-                    <input class="form-control" @bind="TagsText" placeholder="Work, Health, Travel" />
+                    <input class="form-control"
+                           @bind="TagsText"
+                           placeholder="Work, Health, Travel" />
                 </div>
 
                 @if (PreviewTags.Count > 0)
@@ -119,13 +146,17 @@
                     <div class="d-flex flex-wrap gap-2 mt-2">
                         @foreach (var t in PreviewTags)
                         {
-                            <span class="badge rounded-pill bg-light text-dark px-3 py-2">@t</span>
+                            <span class="badge rounded-pill bg-light text-dark px-3 py-2">
+                                @t
+                            </span>
                         }
                     </div>
                 }
                 else
                 {
-                    <div class="text-muted small">Tags you type will preview here.</div>
+                    <div class="text-muted small">
+                        Tags you type will preview here.
+                    </div>
                 }
 
                 <hr class="my-3" style="border-color: rgba(255,255,255,0.12);" />
@@ -134,20 +165,27 @@
                     <span class="oi oi-trash me-2" aria-hidden="true"></span>
                     Delete Today
                 </button>
+
                 <div class="text-muted small mt-2">
                     This deletes only today’s entry.
                 </div>
+
             </div>
         </div>
+
     </div>
+
 </div>
 
 @code {
+
     string Title = "";
     string Content = "";
+
     int PrimaryMoodId = 0;
     int? Secondary1Id = null;
     int? Secondary2Id = null;
+
     string TagsText = "";
 
     string? Message;
@@ -197,7 +235,14 @@
                            .Where(t => !string.IsNullOrWhiteSpace(t))
                            .ToList();
 
-        var result = await JournalService.UpsertTodayAsync(Title, Content, PrimaryMoodId, Secondary1Id, Secondary2Id, tags);
+        var result = await JournalService.UpsertTodayAsync(
+            Title,
+            Content,
+            PrimaryMoodId,
+            Secondary1Id,
+            Secondary2Id,
+            tags
+        );
 
         Message = result.Success ? "Saved successfully." : result.Error;
         IsError = !result.Success;
