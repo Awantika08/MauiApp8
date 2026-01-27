@@ -23,7 +23,7 @@ public class SecurityService
         _factory = factory;
     }
 
-    // ✅ Safe: auto-creates AppSettings row if missing
+    //  auto-creates AppSettings row if missing
     public async Task<bool> HasPinAsync()
     {
         await using var db = await _factory.CreateDbContextAsync();
@@ -40,7 +40,7 @@ public class SecurityService
         return !string.IsNullOrWhiteSpace(settings.PinHash);
     }
 
-    // ✅ Safe: auto-creates AppSettings row if missing
+    //  auto-creates AppSettings row if missing
     public async Task SetPinAsync(string pin)
     {
         await using var db = await _factory.CreateDbContextAsync();
@@ -58,7 +58,7 @@ public class SecurityService
         _unlocked = false; // lock again after setting/changing PIN
     }
 
-    // ✅ Safe: handles missing row + empty PIN
+    //  handles missing row + empty PIN
     public async Task<bool> VerifyPinAsync(string pin)
     {
         await using var db = await _factory.CreateDbContextAsync();
@@ -73,7 +73,7 @@ public class SecurityService
     public void MarkUnlocked() => _unlocked = true;
     public void Lock() => _unlocked = false;
 
-    // 🔁 Compatibility wrappers (so your pages don't break)
+    // Compatibility wrappers 
     public Task SavePinAsync(string pin) => SetPinAsync(pin);
     public Task<bool> ValidatePinAsync(string pin) => VerifyPinAsync(pin);
 }

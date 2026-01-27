@@ -76,7 +76,7 @@ public class JournalService
                 .Include(e => e.EntryTags)
                 .FirstOrDefaultAsync(e => e.EntryDate == today);
 
-            // ensure tags exist
+            // ensuring tags exist
             var tags = new List<Tag>();
             foreach (var raw in tagNames.Distinct(StringComparer.OrdinalIgnoreCase))
             {

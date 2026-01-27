@@ -57,16 +57,10 @@
 
                 <div class="mb-0">
                     <label class="form-label">Content</label>
-                    <textarea class="form-control"
-                              rows="10"
-                              @bind="Content"
-                              placeholder="Write here… what happened today? how did you feel?">
-                    </textarea>
+                    <QuillEditor @bind-Content="Content" Placeholder="Write here… what happened today? how did you feel?" />
 
                     <div class="text-muted small mt-2">
-                        Tip: use <code>#</code> for headings,
-                        <code>**bold**</code>,
-                        <code>-</code> lists.
+                        Rich text enabled.
                     </div>
                 </div>
 
@@ -204,6 +198,23 @@
     protected override async Task OnInitializedAsync()
     {
         Moods = await JournalService.GetMoodsAsync();
+
+        // Loading existing entry for today if it exists
+        var result = await JournalService.GetEntryByDateAsync(DateTime.Now);
+        if (result.Success && result.Data != null)
+        {
+            var e = result.Data;
+            Title = e.Title;
+            Content = e.Content;
+            PrimaryMoodId = e.PrimaryMoodId;
+            Secondary1Id = e.SecondaryMood1Id;
+            Secondary2Id = e.SecondaryMood2Id;
+
+            if (e.EntryTags != null)
+            {
+                TagsText = string.Join(", ", e.EntryTags.Select(t => t.Tag?.Name).Where(n => !string.IsNullOrWhiteSpace(n)));
+            }
+        }
     }
 
     void ClearForm()

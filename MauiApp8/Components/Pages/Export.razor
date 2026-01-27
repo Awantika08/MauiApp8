@@ -2,87 +2,101 @@
 @inject MauiApp8.Services.JournalService JournalService
 @inject MauiApp8.Services.PdfExportService PdfExportService
 
-<div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-2 mb-3">
-    <div>
-        <h2 class="mb-0 fw-bold">Export</h2>
-        <div class="text-muted mt-1">Download your journal entries as a PDF.</div>
+<div class="content-container" style="max-width: 900px;">
+    
+    <div class="text-center mb-5">
+        <h1 class="fw-bold mb-2">Export Journal</h1>
+        <p class="text-muted">Create a beautifully formatted PDF of your memories.</p>
     </div>
-</div>
 
-@if (!string.IsNullOrWhiteSpace(Message))
-{
-    <div class="alert @(IsError ? "alert-danger" : "alert-info") border-0 rounded-4 shadow-sm">
-        <div class="d-flex align-items-start gap-2">
-            <span class="oi @(IsError ? "oi-warning" : "oi-info") mt-1" aria-hidden="true"></span>
-            <div style="white-space: pre-wrap;">@Message</div>
-        </div>
-    </div>
-}
-
-<div class="row g-3">
-    <div class="col-lg-7">
-        <div class="card">
-            <div class="card-header py-3">
-                <div class="fw-semibold">Export Range</div>
-                <div class="text-muted small">Choose a date range and generate your PDF.</div>
-            </div>
-
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Start Date</label>
-                        <input type="date" class="form-control"
-                               @bind-value="StartDate" @bind-value:format="yyyy-MM-dd" />
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">End Date</label>
-                        <input type="date" class="form-control"
-                               @bind-value="EndDate" @bind-value:format="yyyy-MM-dd" />
-                    </div>
-                </div>
-
-                <hr class="my-4" style="border-color: rgba(255,255,255,0.12);" />
-
-                <button class="btn btn-primary w-100 py-2" disabled="@IsBusy" @onclick="ExportPdf">
-                    @if (IsBusy)
-                    {
-                        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-                        <span>Generating PDF…</span>
-                    }
-                    else
-                    {
-                        <span class="oi oi-data-transfer-download me-2" aria-hidden="true"></span>
-                        <span>Export PDF</span>
-                    }
-                </button>
-
-                <div class="text-muted small mt-2">
-                    Your PDF will be saved locally and opened automatically.
-                </div>
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <div class="alert @(IsError ? "alert-danger" : "alert-success") border-0 rounded-4 shadow-sm mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <span class="oi @(IsError ? "oi-warning" : "oi-check") fs-4" aria-hidden="true"></span>
+                <div style="white-space: pre-wrap;">@Message</div>
             </div>
         </div>
-    </div>
+    }
 
-    <div class="col-lg-5">
-        <div class="card h-100">
-            <div class="card-header py-3">
-                <div class="fw-semibold">What’s Included</div>
-                <div class="text-muted small">For the selected date range</div>
+    <div class="row g-4">
+        <!-- Main Export Settings -->
+        <div class="col-lg-7">
+            <div class="card h-100 border-0 shadow-sm" style="overflow: hidden;">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="oi oi-calendar text-primary"></span>
+                        <h5 class="fw-bold mb-0">Select Range</h5>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted fw-bold text-uppercase">From</label>
+                            <input type="date" class="form-control form-control-lg bg-light border-0"
+                                   @bind-value="StartDate" @bind-value:format="yyyy-MM-dd" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted fw-bold text-uppercase">To</label>
+                            <input type="date" class="form-control form-control-lg bg-light border-0"
+                                   @bind-value="EndDate" @bind-value:format="yyyy-MM-dd" />
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top">
+                         <button class="btn btn-primary w-100 py-3 rounded-4 shadow-sm fw-bold fs-5" 
+                                disabled="@IsBusy" @onclick="ExportPdf">
+                            @if (IsBusy)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                                <span>Generating...</span>
+                            }
+                            else
+                            {
+                                <span class="oi oi-data-transfer-download me-2" aria-hidden="true"></span>
+                                <span>Export PDF Now</span>
+                            }
+                        </button>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="card-body">
-                <ul class="mb-0">
-                    <li>Entry dates, titles, and content</li>
-                    <li>Mood info (if available)</li>
-                    <li>Tags (if available)</li>
-                </ul>
+        <!-- Info / Preview Side -->
+        <div class="col-lg-5">
+            <div class="card h-100 border-0 shadow-sm bg-light">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <h6 class="fw-bold mb-3">What's Included?</h6>
+                    
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
+                        <li class="d-flex align-items-center gap-3">
+                            <div class="bg-white p-2 rounded-circle shadow-sm text-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                <span class="oi oi-book" style="font-size: 0.9rem;"></span>
+                            </div>
+                            <span class="text-muted">Full journal entries</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-3">
+                            <div class="bg-white p-2 rounded-circle shadow-sm text-success d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                <span class="oi oi-heart" style="font-size: 0.9rem;"></span>
+                            </div>
+                            <span class="text-muted">Mood tracking analytics</span>
+                        </li>
+                         <li class="d-flex align-items-center gap-3">
+                            <div class="bg-white p-2 rounded-circle shadow-sm text-info d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                <span class="oi oi-tags" style="font-size: 0.9rem;"></span>
+                            </div>
+                            <span class="text-muted">Smart tags & metadata</span>
+                        </li>
+                    </ul>
 
-                <div class="mt-3 p-3 rounded-4"
-                     style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);">
-                    <div class="fw-semibold">Range Preview</div>
-                    <div class="text-muted small mt-1">
-                        @StartDate.ToString("MMM dd, yyyy") → @EndDate.ToString("MMM dd, yyyy")
+                    <div class="mt-4 p-3 rounded-4 bg-white border border-opacity-10 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small fw-bold text-uppercase text-muted">Preview Range</span>
+                        </div>
+                         <div class="fw-bold text-dark">
+                             @StartDate.ToString("MMM dd") - @EndDate.ToString("MMM dd, yyyy")
+                         </div>
                     </div>
                 </div>
             </div>
@@ -105,7 +119,7 @@
 
         if (EndDate < StartDate)
         {
-            Message = "End Date cannot be earlier than Start Date.";
+            Message = "End date cannot be earlier than start date.";
             IsError = true;
             return;
         }
@@ -113,16 +127,18 @@
         try
         {
             IsBusy = true;
-            Message = "Generating PDF...";
+            // Short delay for UI 
+            await Task.Delay(500);
 
             var entries = await JournalService.GetEntriesInRangeAsync(StartDate, EndDate);
             var bytes = PdfExportService.GenerateJournalPdf(entries, StartDate, EndDate);
 
-            var fileName = $"Journal_{StartDate:yyyyMMdd}_{EndDate:yyyyMMdd}.pdf";
+            var fileName = $"MyJournal_{StartDate:MMM-dd}_to_{EndDate:MMM-dd-yyyy}.pdf";
             var path = Path.Combine(FileSystem.AppDataDirectory, fileName);
             await File.WriteAllBytesAsync(path, bytes);
 
-            Message = $"PDF saved successfully.\n\nLocation:\n{path}";
+            Message = $"Success! Your journal has been exported.";
+            IsError = false;
 
             await Launcher.Default.OpenAsync(new OpenFileRequest
             {
@@ -132,7 +148,7 @@
         catch (Exception ex)
         {
             IsError = true;
-            Message = $"Export failed:\n{ex.Message}";
+            Message = $"Oops! Something went wrong:\n{ex.Message}";
         }
         finally
         {

@@ -16,7 +16,6 @@
 
         // allowing these pages while locked
         var allowed =
-            string.IsNullOrWhiteSpace(relative) ||
             relative.StartsWith("lock") ||
             relative.StartsWith("security");
 

@@ -206,7 +206,9 @@ else
     static string Snippet(string text, int max)
     {
         if (string.IsNullOrWhiteSpace(text)) return "";
-        var clean = text.Replace("\r", " ").Replace("\n", " ").Trim();
+        // Strip HTML tags for the snippet
+        var clean = System.Text.RegularExpressions.Regex.Replace(text, "<.*?>", string.Empty);
+        clean = clean.Replace("\r", " ").Replace("\n", " ").Replace("&nbsp;", " ").Trim();
         return clean.Length <= max ? clean : clean.Substring(0, max) + "…";
     }
 }

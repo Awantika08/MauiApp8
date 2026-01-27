@@ -43,6 +43,7 @@ public static class MauiProgram
         builder.Services.AddScoped<ThemeService>(); // Scoped for proper JS interop per WebView
         builder.Services.AddSingleton<PdfExportService>();
 
+        
         var app = builder.Build();
 
         //  Creating DB + seed data on startup

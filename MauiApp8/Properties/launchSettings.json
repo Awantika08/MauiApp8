@@ -2,7 +2,10 @@
   "profiles": {
     "Windows Machine": {
       "commandName": "Project",
-      "nativeDebugging": false
+      "nativeDebugging": true
+    },
+    "MauiApp8": {
+      "commandName": "Project"
     }
   }
 }

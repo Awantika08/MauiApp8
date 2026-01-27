@@ -1,24 +1,32 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>MauiApp8</title>
     <base href="/" />
 
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
 
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="MauiApp8.styles.css" />
     <link rel="icon" href="data:,">
 
-   
+    <!-- Quill.js Theme -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+
     <style>
-        html, body {
+        html,
+        body {
             height: 100%;
             font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -27,13 +35,16 @@
             margin: 0;
         }
 
-        
-        h1, h2, h3, .brand-title {
+
+        h1,
+        h2,
+        h3,
+        .brand-title {
             font-family: "Playfair Display", serif !important;
             letter-spacing: 0.2px;
         }
 
-       
+
         #app {
             color: var(--text);
             font-weight: 600;
@@ -55,8 +66,12 @@
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
 
+    <!-- Quill.js Script -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="js/quillInterop.js"></script>
+
     <script>
-       
+
         (function () {
             try {
                 const saved = localStorage.getItem("app_theme");
@@ -78,4 +93,5 @@
     </script>
 
 </body>
+
 </html>

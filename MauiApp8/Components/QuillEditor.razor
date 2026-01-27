@@ -1,0 +1,44 @@
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<div id="@_editorId" style="height: 300px; background: white; border-bottom-left-radius: 14px; border-bottom-right-radius: 14px;"></div>
+
+@code {
+    [Parameter] public string Content { get; set; } = "";
+    [Parameter] public EventCallback<string> ContentChanged { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Write something...";
+
+    private string _editorId = "quill-editor-" + Guid.NewGuid().ToString();
+    private DotNetObjectReference<QuillEditor>? _objRef;
+    private bool _isInitialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("quillInterop.initQuill", _editorId, Placeholder, _objRef);
+            
+            // Set initial content
+            if (!string.IsNullOrEmpty(Content))
+            {
+                await JSRuntime.InvokeVoidAsync("quillInterop.setQuillContent", _editorId, Content);
+            }
+            
+            _isInitialized = true;
+        }
+    }
+    
+    // Called from JS when text changes
+    [JSInvokable]
+    public async Task OnContentChanged(string html)
+    {
+        Content = html;
+        await ContentChanged.InvokeAsync(html);
+    }
+
+    public void Dispose()
+    {
+        _objRef?.Dispose();
+    }
+}

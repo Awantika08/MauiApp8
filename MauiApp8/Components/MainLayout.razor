@@ -1,11 +1,13 @@
 ﻿@namespace MauiApp8.Components
 @inherits LayoutComponentBase
 @inject MauiApp8.Services.ThemeService Theme
+@inject MauiApp8.Services.JournalService JournalService
 
 <div class="app-shell">
+    <SecurityGuard />
     <aside class="app-sidebar">
 
-        <!-- ✅ Brand + Theme Toggle (in sidebar) -->
+        <!--  Brand + Theme Toggle (in sidebar) -->
         <div class="sidebar-brand">
             <div class="brand-left">
                 <div class="brand-mark">J</div>
@@ -46,8 +48,16 @@
 
     <main class="app-main">
 
-        <!-- ✅ Topbar (clean, no theme button here now) -->
-        <header class="app-topbar"></header>
+        <!--  Topbar with Streak -->
+        <header class="app-topbar">
+            <div class="topbar-right">
+                <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-4" 
+                     style="background: var(--surface); border: 1px solid var(--border);">
+                    <span class="fs-5">🔥</span>
+                    <span class="fw-bold" style="color: var(--text);">@CurrentStreak</span>
+                </div>
+            </div>
+        </header>
 
         <section class="app-content">
             <div class="content-container">
@@ -58,6 +68,14 @@
 </div>
 
 @code {
+    int CurrentStreak;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (s, _, _) = await JournalService.GetStreakStatsAsync();
+        CurrentStreak = s;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

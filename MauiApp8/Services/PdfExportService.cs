@@ -16,57 +16,89 @@ public class PdfExportService
         {
             container.Page(page =>
             {
-                page.Margin(30);
+                page.Margin(0); 
                 page.Size(PageSizes.A4);
+                page.DefaultTextStyle(x => x.FontFamily("Arial").Fallback(fb => fb.FontFamily("Segoe UI Emoji")).FontSize(10));
 
                 page.Header().Column(col =>
                 {
-                    col.Item().Text("Journal Export").FontSize(20).SemiBold();
-                    col.Item().Text($"Date Range: {start:yyyy-MM-dd} -> {end:yyyy-MM-dd}");
-                    col.Item().LineHorizontal(1);
+                    col.Item()
+                       .Background("#ff4fa3") 
+                       .Padding(30)
+                       .Row(row =>
+                       {
+                           row.RelativeItem().Column(c =>
+                           {
+                               c.Item().Text("My Journal").FontSize(24).Bold().FontColor(QuestColors.White);
+                               c.Item().Text($"{start:MMM dd, yyyy} - {end:MMM dd, yyyy}")
+                                    .FontSize(12).FontColor(QuestColors.White);
+                           });
+
+                           row.ConstantItem(50).AlignRight().Text("📖").FontSize(30);
+                       });
                 });
 
-                page.Content().Column(col =>
+                page.Content().Padding(30).Column(col =>
                 {
                     if (entries.Count == 0)
                     {
-                        col.Item().Text("No entries found in selected range.");
+                        col.Item().AlignCenter().Text("No journal entries found for this period.")
+                           .FontSize(16).FontColor(QuestColors.Grey.Medium);
                         return;
                     }
 
                     foreach (var e in entries.OrderBy(x => x.EntryDate))
                     {
-                        col.Item().PaddingVertical(8).Column(card =>
+                        col.Item().PaddingVertical(10).Column(entryCol =>
                         {
-                            card.Item()
-                                .Text($"{e.EntryDate:yyyy-MM-dd}  |  {e.Title}")
-                                .SemiBold()
-                                .FontSize(14);
+                            // Entry Date Header
+                            entryCol.Item().Row(r =>
+                            {
+                                r.RelativeItem().Text($"{e.EntryDate:dddd, MMMM dd}").FontSize(10).SemiBold().FontColor("#ff4fa3");
+                                r.ConstantItem(100).AlignRight().Text($"{e.EntryDate:yyyy}").FontSize(10).FontColor(QuestColors.Grey.Medium);
+                            });
 
-                            card.Item().Text($"Primary Mood: {e.PrimaryMood?.Name ?? "-"}");
-                            card.Item().Text($"Word Count: {e.WordCount}");
+                            // Card box
+                            entryCol.Item().Border(1).BorderColor(QuestColors.Grey.Lighten3).Padding(15).Column(card =>
+                            {
+                                card.Item().Text(e.Title).FontSize(16).Bold().FontColor(QuestColors.Black);
+                                
+                                card.Item().PaddingTop(5).Row(meta =>
+                                {
+                                    if (e.PrimaryMood != null)
+                                    {
+                                        meta.AutoItem().Background(QuestColors.Purple.Lighten4)
+                                            .PaddingHorizontal(8).PaddingVertical(2)
+                                            .Text($"Mood: {e.PrimaryMood.Name}").FontSize(9).FontColor(QuestColors.Purple.Darken2);
+                                    }
+                                    
+                                    meta.RelativeItem().AlignRight().Text($"{e.WordCount} words").FontSize(9).Italic().FontColor(QuestColors.Grey.Darken1);
+                                });
 
-                            var tags = e.EntryTags?
-                                .Select(t => t.Tag!.Name)
-                                .ToList() ?? new List<string>();
+                                // Strip HTML before rendering to PDF
+                                var cleanContent = System.Text.RegularExpressions.Regex.Replace(e.Content ?? "", "<.*?>", string.Empty);
+                                cleanContent = cleanContent.Replace("&nbsp;", " ");
 
-                            card.Item().Text($"Tags: {(tags.Count == 0 ? "-" : string.Join(", ", tags))}");
+                                card.Item().PaddingTop(10).Text(cleanContent)
+                                    .FontSize(11).LineHeight(1.4f).FontColor(QuestColors.Grey.Darken3);
 
-                            card.Item()
-                                .PaddingTop(4)
-                                .Background(QuestColors.Grey.Lighten4)
-                                .Padding(8)
-                                .Text(e.Content ?? "");
+                                if (e.EntryTags != null && e.EntryTags.Any())
+                                {
+                                    var tags = string.Join(", ", e.EntryTags.Select(t => t.Tag!.Name));
+                                    card.Item().PaddingTop(10).Text($"Tags: {tags}")
+                                        .FontSize(9).FontColor(QuestColors.Blue.Medium);
+                                }
+                            });
                         });
-
-                        col.Item().LineHorizontal(0.5f);
                     }
                 });
 
-                page.Footer().AlignCenter().Text(x =>
+                page.Footer().Padding(20).AlignCenter().Text(x =>
                 {
-                    x.Span("Generated on ");
-                  
+                    x.Span("Generated by MauiApp8 Journal on ");
+                    x.Span(DateTime.Now.ToString("g"));
+                    x.Span(" | Page ");
+                    x.CurrentPageNumber();
                 });
             });
         }).GeneratePdf();
